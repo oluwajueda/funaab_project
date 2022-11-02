@@ -14,6 +14,21 @@ const getAllTestimony = async (req, res) => {
   res.status(200).json({ testimonies, count: testimonies.length });
 };
 
+const getSingleTestimony = async (req, res) => {
+  const {
+    params: { id: testimonyId },
+  } = req;
+
+  const testimony = await Testimony.findOne({
+    _id: testimonyId,
+  });
+
+  if (!testimony) {
+    res.status(404).json(`No event with id ${testimonyId}`);
+  }
+  res.status(201).json({ testimony });
+};
+
 const updateTestimony = async (req, res) => {
   try {
     const { id: testimonyId } = req.params;
@@ -51,4 +66,6 @@ module.exports = {
   createTestimony,
   deleteTestimony,
   getAllTestimony,
+  updateTestimony,
+  getSingleTestimony,
 };

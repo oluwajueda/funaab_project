@@ -1,4 +1,4 @@
-const mongoose = equire("mongoose");
+const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema(
   {

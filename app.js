@@ -8,9 +8,11 @@ app.use(express.json());
 
 const authRouter = require("./routes/auth");
 const testimonyRouter = require("./routes/testimony");
+const eventRouter = require("./routes/event");
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/testimony", testimonyRouter);
+app.use("/api/v1/event", eventRouter);
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
