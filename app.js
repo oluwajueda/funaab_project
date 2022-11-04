@@ -4,11 +4,15 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 
-app.use(express.json());
+const fileUpload = require("express-fileupload");
 
 const authRouter = require("./routes/auth");
 const testimonyRouter = require("./routes/testimony");
 const eventRouter = require("./routes/event");
+
+app.use(express.static("./public"));
+app.use(fileUpload());
+app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/testimony", testimonyRouter);

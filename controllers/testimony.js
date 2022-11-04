@@ -30,21 +30,17 @@ const getSingleTestimony = async (req, res) => {
 };
 
 const updateTestimony = async (req, res) => {
-  try {
-    const { id: testimonyId } = req.params;
+  const { id: testimonyId } = req.params;
 
-    const testimony = Testimony.findByIdAndUpdate(
-      { _id: testimonyId },
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!testimony) {
-      res.status(404).json(`No testimony with id ${testimonyId}`);
-    }
-    res.status(200).send({ testimony });
-  } catch (error) {
-    res.status(500).json({ msg: error });
+  const testimony = await Testimony.findOneAndUpdate(
+    { _id: testimonyId },
+    req.body,
+    { new: true, runValidators: true }
+  );
+  if (!testimony) {
+    res.status(404).json(`No testimony with id ${testimonyId}`);
   }
+  res.status(200).send({ testimony });
 };
 
 const deleteTestimony = async (req, res) => {

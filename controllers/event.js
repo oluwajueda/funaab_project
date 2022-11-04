@@ -1,4 +1,5 @@
 const Event = require("../models/events");
+const path = require("path");
 
 const createEvent = async (req, res) => {
   const event = await Event.create(req.body);
@@ -54,10 +55,32 @@ const deleteEvent = async (req, res) => {
   res.status(201).send();
 };
 
+const uploadImage = async (req, res) => {
+  // console.log(req.files);
+  // res.send("upload product image");
+  if (!req.files) {
+    res.status(404).json(`No File Uploaded`);
+  }
+
+  const productImage = req.files.image;
+  if (!productImage.mimetype.startsWith("image")) {
+    res.status(404).json("Please Upload Image");
+  }
+
+  const imagePath = path.join(
+    __dirname,
+    "../public/uploads/" + `${productImage.name}`
+  );
+
+  await productImage.mv(imagePath);
+  res.status(201).json({ image: `/uploads/${productImage.name}` });
+};
+
 module.exports = {
   createEvent,
   getAllEvent,
   updateEvent,
   deleteEvent,
   getSingleEvent,
+  uploadImage,
 };

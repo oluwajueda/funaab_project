@@ -2,9 +2,14 @@ const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema(
   {
-    image: {
+    name: {
       type: String,
       required: true,
+    },
+
+    image: {
+      type: String,
+      default: "/uploads/example.jpeg",
     },
     title: {
       type: String,
