@@ -3,6 +3,7 @@ const { MONGO_URI } = process.env;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const PORT = process.env.PORT || 5000;
 
 const fileUpload = require("express-fileupload");
 
@@ -52,6 +53,6 @@ db.once("open", function () {
   console.log("Connected successfully");
 });
 
-app.listen(5000, () => {
+app.listen(PORT, () => {
   console.log("app listening on port 5000");
 });
