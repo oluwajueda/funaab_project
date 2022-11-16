@@ -1,26 +1,38 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const { isTokenValid } = require("../utils");
+const Token = require("../models/Token");
+const { attachCookiesToResponse } = require("../utils");
 
-const auth = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  console.log(authHeader);
-  if (!authHeader || !authHeader.startsWith("Bearer")) {
-    res.status(400).send("Authentication invalid");
-  }
-
-  const token = authHeader.split(" ")[1];
+const authenticateUser = async (req, res, next) => {
+  const { refreshToken, accessToken } = req.signedCookies;
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (accessToken) {
+      const payload = isTokenValid(accessToken);
+      req.user = payload.user;
+      return next();
+    }
+    const payload = isTokenValid(refreshToken);
 
-    const { userId, email } = payload;
-    req.user = { userId, email };
-    console.log(req.user);
+    const existingToken = await Token.findOne({
+      user: payload.user.userId,
+      refreshToken: payload.refreshToken,
+    });
+    if (!existingToken || !existingToken?.isValid) {
+      res.status(401).json("Authentication Invalid");
+    }
+
+    attachCookiesToResponse({
+      res,
+      user: payload.user,
+      refreshToken: existingToken.refreshToken,
+    }),
+      (req.user = payload.user);
     next();
   } catch (error) {
-    console.log(error);
+    res.status(401).json("Authentication Invalid");
   }
 };
 
-module.exports = auth;
+module.exports = {
+  authenticateUser,
+};

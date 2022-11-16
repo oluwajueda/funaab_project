@@ -5,18 +5,22 @@ const app = express();
 const mongoose = require("mongoose");
 
 const fileUpload = require("express-fileupload");
+const cookieParser = require("cookie-parser");
 
 const authRouter = require("./routes/auth");
 const testimonyRouter = require("./routes/testimony");
 const eventRouter = require("./routes/event");
+const excoRouter = require("./routes/exco");
 
 app.use(express.static("./public"));
 app.use(fileUpload());
 app.use(express.json());
+app.use(cookieParser("secret"));
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/testimony", testimonyRouter);
 app.use("/api/v1/event", eventRouter);
+app.use("/api/v1/exco", excoRouter);
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,

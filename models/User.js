@@ -47,6 +47,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return;
   const secret = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, secret);
 });
@@ -64,8 +65,8 @@ UserSchema.pre("save", async function (next) {
 //   );
 // };
 
-UserSchema.methods.comparePassword = async function (candidatePassword) {
-  const Match = await bcrypt.compare(candidatePassword, this.password);
+UserSchema.methods.comparePassword = async function (canditatePassword) {
+  const Match = await bcrypt.compare(canditatePassword, this.password);
   return Match;
 };
 

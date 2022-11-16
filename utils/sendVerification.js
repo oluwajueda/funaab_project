@@ -3,10 +3,10 @@ const sendEmail = require("./sendEmail");
 const sendVerificationEmail = async ({
   name,
   email,
-  veerificationToken,
+  verificationToken,
   origin,
 }) => {
-  const verifyEmail = `${origin}/user/verify-email?token=${veerificationToken}&email=${email}`;
+  const verifyEmail = `${origin}/user/verify-email?token=${verificationToken}&email=${email}`;
 
   const message = `<p>Please confirm your eamail by clicking on the following link : <a href="${verifyEmail}"> Verify Email</a> </p>`;
 

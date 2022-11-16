@@ -1,8 +1,13 @@
-const { StatusCodes } = require("http-status-codes");
 const User = require("../models/User");
 const Token = require("../models/Token");
 const crypto = require("crypto");
-const { sendVerificationEmail } = require("../utils");
+const {
+  sendVerificationEmail,
+  createUserToken,
+  sendResetPasswordEmail,
+  createHash,
+  attachCookiesToResponse,
+} = require("../utils");
 
 const register = async (req, res) => {
   try {
@@ -35,7 +40,7 @@ const register = async (req, res) => {
       verificationToken,
     });
 
-    const origin = "http://localhost:5000";
+    const origin = "http://localhost:3000";
 
     await sendVerificationEmail({
       name: user.name,
@@ -73,33 +78,120 @@ const verifyEmail = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    if (!(email && password)) {
-      res.status(400).send("All input is required");
-    }
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      res.status(400).send("email does not exist");
-    }
-
-    const isPasswordCorrect = await user.comparePassword(password);
-
-    if (!isPasswordCorrect) {
-      res.status(400).send("Invalid Credentials");
-    }
-    const token = user.createJWT();
-    res.status(200).json({ user: { email: user.email }, token });
-  } catch (err) {
-    console.log(err);
+  if (!(email && password)) {
+    res.status(401).send("Please provide email and password");
+    return;
   }
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    res.status(401).send("invalid credentials");
+    return;
+  }
+
+  isPasswordCorrect = await user.comparePassword(password);
+
+  if (!isPasswordCorrect) {
+    res.status(401).send("invalid credentials");
+    return;
+  }
+  if (!user.isVerified) {
+    res.status(401).send("Please verify your email");
+  }
+
+  const tokenUser = createUserToken(user);
+
+  // create refresh token
+  let refreshToken = "";
+  // check for existing token
+  const existingToken = await Token.findOne({ user: user._id });
+
+  if (existingToken) {
+    const { isValid } = existingToken;
+    if (!isValid) {
+      res.status(401).json("Invalid Credentials");
+    }
+    refreshToken = existingToken.refreshToken;
+    attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+    res.status(201).json({ user: tokenUser });
+    return;
+  }
+
+  refreshToken = crypto.randomBytes(40).toString("hex");
+  const userAgent = req.headers["user-agent"];
+  const ip = req.ip;
+  const userToken = { refreshToken, ip, userAgent, user: user._id };
+
+  await Token.create(userToken);
+
+  attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
+  res.status(StatusCodes.OK).json({ user: tokenUser });
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    res.status(401).json("Please provide valid email");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const passwordToken = crypto.randomBytes(70).toString("hex");
+
+    const origin = "http://localhost:3000";
+
+    await sendResetPasswordEmail({
+      name: user.name,
+      email: user.email,
+      token: passwordToken,
+      origin,
+    });
+
+    const tenMinutes = 1000 * 6 * 10;
+    const passwordTokenExpirationDate = new Date(Date.now() + tenMinutes);
+    user.passwordToken = createHash(passwordToken);
+    user.passwordTokenExpirationDate = passwordTokenExpirationDate;
+
+    await user.save();
+  }
+  res
+    .status(201)
+    .json({ msg: "Please check your email for reset password link" });
+};
+
+const resetPassword = async (req, res) => {
+  const { token, email, password } = req.body;
+
+  if (!token || !email || !password) {
+    res.status(401).json({ msg: "Please provide all values" });
+  }
+
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const currentDate = new Date();
+    if (
+      user.passwordToken === createHash(token) &&
+      user.passwordTokenExpirationDate > currentDate
+    ) {
+      user.password = password;
+      user.passwordToken = null;
+      user.passwordTokenExpirationDate = null;
+      await user.save();
+    }
+  }
+  res.send("reset password");
 };
 
 module.exports = {
   register,
   verifyEmail,
   login,
+  forgotPassword,
+  resetPassword,
 };
