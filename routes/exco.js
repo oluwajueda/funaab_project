@@ -9,7 +9,7 @@ const {
   deleteExco,
   getSingleExco,
   uploadExcoImage,
-} = require("../controllers/exco");
+} = require("../controllers/Exco");
 
 router.route("/").post(createExco).get(getAllExco);
 router.route("/:id").delete(deleteExco).get(getSingleExco).patch(updateExco);
