@@ -4,8 +4,8 @@ const createTestimony = async (req, res) => {
   req.body.createdBy = req.user.userId;
 
   const testimony = await Testimony.create(req.body);
-  console.log(req.body);
-  res.status(200).json({ testimony });
+
+  res.status(201).json({ testimony });
 };
 
 const getAllTestimony = async (req, res) => {
@@ -26,7 +26,7 @@ const getSingleTestimony = async (req, res) => {
   if (!testimony) {
     res.status(404).json(`No event with id ${testimonyId}`);
   }
-  res.status(201).json({ testimony });
+  res.status(200).json({ testimony });
 };
 
 const updateTestimony = async (req, res) => {
@@ -55,7 +55,7 @@ const deleteTestimony = async (req, res) => {
   if (!testimony) {
     res.status(404).json(`No testimony with id ${testimonyId}`);
   }
-  res.status(201).send();
+  res.status(200).send();
 };
 
 module.exports = {

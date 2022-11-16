@@ -23,7 +23,7 @@ const getSingleExco = async (req, res) => {
   });
 
   if (!exco) {
-    res.status(401).json(`No exco with id ${excoId}`);
+    res.status(404).json(`No exco with id ${excoId}`);
   }
   res.status(201).json({ exco });
 };
@@ -37,7 +37,7 @@ const updateExco = async (req, res) => {
   });
 
   if (!exco) {
-    res.status(401).json(`No exco with id ${excoId}`);
+    res.status(404).json(`No exco with id ${excoId}`);
   }
 
   res.status(201).json({ exco });
@@ -53,7 +53,7 @@ const deleteExco = async (req, res) => {
   });
 
   if (!exco) {
-    res.status(401).json(`No exco with id ${excoId}`);
+    res.status(404).json(`No exco with id ${excoId}`);
   }
 
   await exco.remove();
