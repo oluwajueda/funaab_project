@@ -5,9 +5,10 @@ const sendEmail = async ({ to, subject, html }) => {
   let testAccount = await nodemailer.createTestAccount();
 
   var transport = nodemailer.createTransport(nodemailerConfig);
+  transport.verify().then(console.log).catch(console.error);
 
   return transport.sendMail({
-    from: '"Funaab Fellowsip" <osuolaleolamde1@example.com>', // sender address
+    from: '"TACSFON" <osuolaleolamide6@gmail.com>', // sender address
     to,
     subject,
     html,

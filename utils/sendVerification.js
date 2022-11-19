@@ -8,11 +8,11 @@ const sendVerificationEmail = async ({
 }) => {
   const verifyEmail = `${origin}/user/verify-email?token=${verificationToken}&email=${email}`;
 
-  const message = `<p>Please confirm your eamail by clicking on the following link : <a href="${verifyEmail}"> Verify Email</a> </p>`;
+  const message = `<p>Please confirm your email by clicking on the following link : <a href="${verifyEmail}"> Verify Email</a> </p>`;
 
   return sendEmail({
     to: email,
-    subject: "Email Confirmation",
+    subject: "Email Verification | TASCFON",
     html: `<h4> Hello, ${name}</h4>
         ${message}
         `,
